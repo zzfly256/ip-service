@@ -10,7 +10,7 @@ type StandardError struct {
 }
 
 var (
-	IpNotFound = StandardError{30001, "IP地址获取失败"}
+	IpParameterError = StandardError{30001, "IP地址参数错误"}
 )
 
 func (error StandardError) Error() string {

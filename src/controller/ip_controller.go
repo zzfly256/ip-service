@@ -9,7 +9,7 @@ import (
 func QueryMyIp(context *gin.Context) {
 	ip := context.ClientIP()
 	if len(ip) == 0 {
-		context.Set("error", error.IpNotFound)
+		context.Set("error", error.IpParameterError)
 	} else {
 		context.Set("data", ip)
 	}
@@ -23,6 +23,10 @@ func QueryIpAddress(context *gin.Context) {
 	}
 	if len(ip) == 0 {
 		ip = context.ClientIP()
+	}
+	if !helper.CheckIp(ip) {
+		context.Set("error", error.IpParameterError)
+		return
 	}
 
 	// 匹配结果

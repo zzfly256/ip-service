@@ -7,12 +7,14 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
 type IpData struct {
-	list idl.IpAddressInfoList
+	List  idl.IpAddressInfoList
+	Cache map[string]idl.IpAddressInfoItem
 }
 
 var ipData *IpData
@@ -22,8 +24,6 @@ func LoadIpData() *IpData {
 	// TODO: 二重锁 or 饿汉模式
 	if ipData == nil {
 		path := filepath.Dir(os.Args[0]) + "/storage/czip.txt"
-		// 测试
-		path = "/mnt/c/Users/rytia/Desktop/LearningGo/storage/czip.txt"
 		fp, err := os.Open(path)
 
 		if err != nil {
@@ -33,13 +33,14 @@ func LoadIpData() *IpData {
 		defer fp.Close()
 
 		ipData = &IpData{
-			list: []idl.IpAddressInfoItem{},
+			List: []idl.IpAddressInfoItem{},
 		}
 
 		reader := bufio.NewReader(fp)
 		for {
 			line, err := reader.ReadString('\n')
 			if err == io.EOF {
+				fmt.Println("IP 地址加载完成")
 				break
 			}
 			if err != nil {
@@ -48,14 +49,21 @@ func LoadIpData() *IpData {
 
 			lineSlice := strings.Fields(line)
 
+			// 非预期格式则跳过
+			if len(lineSlice) < 3 {
+				continue
+			}
+
 			ipItem := idl.IpAddressInfoItem{
 				Area:         lineSlice[2],
 				Isp:          strings.Trim(fmt.Sprint(lineSlice[3:]), "[]"),
 				SegmentStart: transformIpAddressToStdString(lineSlice[0]),
 				SegmentEnd:   transformIpAddressToStdString(lineSlice[1]),
 			}
-			ipData.list = append(ipData.list, ipItem)
+			ipData.List = append(ipData.List, ipItem)
 		}
+
+		ipData.Cache = make(map[string]idl.IpAddressInfoItem)
 	}
 	return ipData
 }
@@ -64,20 +72,25 @@ func LoadIpData() *IpData {
 func GetIpInfo(ipAddress string) idl.IpAddressInfoItem {
 
 	ipData := LoadIpData()
-	ipTarget := transformIpAddressToStdString(ipAddress)
 
-	for _, item := range ipData.list {
-		if strings.Compare(ipTarget, item.SegmentStart) >= 0 {
-			if strings.Compare(ipTarget, item.SegmentEnd) <= 0 {
-				item.Ip = ipAddress
-				return item
+	if ipData.Cache[ipAddress].Ip == "" {
+		ipTarget := transformIpAddressToStdString(ipAddress)
+		targetItem := idl.IpAddressInfoItem{}
+
+		for _, item := range ipData.List {
+			if strings.Compare(ipTarget, item.SegmentStart) >= 0 {
+				if strings.Compare(ipTarget, item.SegmentEnd) <= 0 {
+					item.Ip = ipAddress
+					targetItem = item
+					break
+				}
 			}
 		}
+
+		ipData.Cache[ipAddress] = targetItem
 	}
 
-	result := idl.IpAddressInfoItem{}
-
-	return result
+	return ipData.Cache[ipAddress]
 }
 
 // 将 IP 地址转化为统一长度的字符串
@@ -96,4 +109,13 @@ func transformIpAddressToStdString(ipAddress string) string {
 	}
 
 	return result
+}
+
+func CheckIp(ip string) bool {
+	addr := strings.Trim(ip, " ")
+	regStr := `^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`
+	if match, _ := regexp.MatchString(regStr, addr); match {
+		return true
+	}
+	return false
 }
