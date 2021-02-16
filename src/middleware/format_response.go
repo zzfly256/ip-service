@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/zzfly256/IpService/src/error"
-	"github.com/zzfly256/IpService/src/idl"
+	"github.com/zzfly256/ip-service/src/error"
+	"github.com/zzfly256/ip-service/src/idl"
 	"net/http"
 )
 

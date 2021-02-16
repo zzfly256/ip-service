@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/zzfly256/IpService/src/controller"
-	"github.com/zzfly256/IpService/src/helper"
-	"github.com/zzfly256/IpService/src/middleware"
+	"github.com/zzfly256/ip-service/src/controller"
+	"github.com/zzfly256/ip-service/src/helper"
+	"github.com/zzfly256/ip-service/src/middleware"
 )
 
 func main() {

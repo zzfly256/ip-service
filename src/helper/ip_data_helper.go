@@ -3,7 +3,7 @@ package helper
 import (
 	"bufio"
 	"fmt"
-	"github.com/zzfly256/IpService/src/idl"
+	"github.com/zzfly256/ip-service/src/idl"
 	"io"
 	"os"
 	"path/filepath"

@@ -1,4 +1,4 @@
-module github.com/zzfly256/IpService
+module github.com/zzfly256/ip-service
 
 go 1.13
 

@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/zzfly256/IpService/src/error"
-	"github.com/zzfly256/IpService/src/helper"
+	"github.com/zzfly256/ip-service/src/error"
+	"github.com/zzfly256/ip-service/src/helper"
 )
 
 func QueryMyIp(context *gin.Context) {
