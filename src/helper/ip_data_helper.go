@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type IpData struct {
@@ -18,6 +19,7 @@ type IpData struct {
 }
 
 var ipData *IpData
+var cacheLock sync.RWMutex
 
 // 加载 IP 地址库
 func LoadIpData() *IpData {
@@ -73,7 +75,11 @@ func GetIpInfo(ipAddress string) idl.IpAddressInfoItem {
 
 	ipData := LoadIpData()
 
+	cacheLock.RLock()
+
 	if ipData.Cache[ipAddress].Ip == "" {
+		cacheLock.RUnlock()
+
 		ipTarget := transformIpAddressToStdString(ipAddress)
 		targetItem := idl.IpAddressInfoItem{}
 
@@ -87,10 +93,16 @@ func GetIpInfo(ipAddress string) idl.IpAddressInfoItem {
 			}
 		}
 
+		cacheLock.Lock()
 		ipData.Cache[ipAddress] = targetItem
+		cacheLock.Unlock()
+		cacheLock.RLock()
 	}
 
-	return ipData.Cache[ipAddress]
+	result := ipData.Cache[ipAddress]
+	cacheLock.RUnlock()
+
+	return result
 }
 
 // 将 IP 地址转化为统一长度的字符串
