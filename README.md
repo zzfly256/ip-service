@@ -9,13 +9,36 @@
 ## 部署方法
 
 0. 若首次部署安装，请提前准备好纯真网络的 IP 库。IP 库可以通过直接安装纯真网络客户端并将其导出为 txt 文件而获得。运行前将其命名为 `czip.txt` 并放置在 `./storage` 文件夹即可。
+
+### 方法一：编译安装
 1. 安装 golang 环境。建议 go1.13 以上。
 2. 编译运行
 
     ```shell
-    go build -o ip-service
+    go mod download
+    go get github.com/zzfly256/ip-service/src
+    go build -o ./ip-service github.com/zzfly256/ip-service/src
     ./ip-service
     ```
+   
+### 方法二：docker
+
+克隆本仓库后，运行一下命令
+   ```shell
+   docker build -t ip-service .
+   docker run -d --rm -p 80:80 ip-service
+   ```
+
+## 纯真网络 ip 库获取方法
+1. 打开网站：www.cz88.net 下载客户端软件，导出 txt 数据库
+2. 将其转换为 UTF8 格式（采用 enca 工具）
+
+   ```shell
+   # 查看文件编码
+   enca -L chinese czip.txt
+   # 从 GB2312 转换为 UTF-8
+   enca -L zh_CN -x UTF-8 czip.txt
+   ```
 
 ## 接口清单
 
@@ -23,7 +46,7 @@
 | :---- | :---- | :---- | :---- |
 | /v1/query_my_ip | GET | 无 | 获取访问者自身 ip |
 | /v1/query_ip_address | GET/POST | ip | 查询 ip 地址相关信息 |
-| /get_metrics | GET | 无 | 获取程序运行相关指标 |
+| /metrics | GET | 无 | 获取程序运行相关指标(Prometheus 格式) |
 
 详细的接口文档后续得闲再补充。
 

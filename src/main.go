@@ -10,7 +10,8 @@ import (
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
 
 	helper.LoadIpData()
 
@@ -22,7 +23,7 @@ func main() {
 		v1.POST("/reload_ip_data", controller.QueryIpAddress)
 	}
 
-	router.GET("/get_metrics", controller.GetServiceMetrics)
+	router.GET("/metrics", controller.GetServiceMetrics)
 
-	_ = router.Run(":3000")
+	_ = router.Run(":80")
 }
